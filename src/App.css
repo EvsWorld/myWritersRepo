@@ -7,9 +7,9 @@
   height: 80px;
 }
 
-.App-header {
+.topMenu {
   background-color: #222;
-  height: 150px;
+  height: 10vh;
   padding: 20px;
   color: white;
 }
@@ -25,4 +25,23 @@
 @keyframes App-logo-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+.topMenu ul {
+  list-style-type: none;
+  display: flex;
+}
+
+.topMenu li a {
+  text-align: center;
+  padding: 16px;
+  color: white;
+  text-decoration: none;
+
+}
+
+.Main {
+  background-color: grey;
+  height: 90vh;
+  
 }

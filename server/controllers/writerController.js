@@ -6,11 +6,13 @@ const fetch = require('isomorphic-fetch');
 const userModel = require('../models/user');
 
 exports.pocketSignIn = async ctx => {
+  let requestToken = '';
   const url = "https://getpocket.com/v3/oauth/request";
-  const data = {
+  const reqBody = {
   	"consumer_key":"75265-200ad444b793e02ce01ec6cb",
   	"redirect_uri":"http://localhost:3001"
   }
+
   // console.log(ctx);
   console.log("You hit the writerController!!!");
   // Send request to pocket to get request code
@@ -23,11 +25,48 @@ exports.pocketSignIn = async ctx => {
       "content-type": "application/json; charset=UTF-8",
       "X-Accept": "application/json"
     },
-    body: JSON.stringify(data)
-  }).then(response => response.text())
-    .then(response => console.log('Success', response))
+    body: JSON.stringify(reqBody)
+  }).then(response => response.json())
+    .then(response => {
+      requestToken = response.code;
+      console.log(`requestToken = ${requestToken}`);
+      ctx.redirect(`https://getpocket.com/auth/authorize?request_token=${requestToken}&redirect_uri=http://localhost:3000/authorize/?requestToken=${requestToken}`);
+
+    })
     .catch(error => console.error('Error', JSON.parse(JSON.stringify(error))));
   };
+
+  exports.getAuthToken = async ctx => {
+    // console.log(ctx);
+    console.log("You hit the getAuthToken controller!!!");
+    console.log('ctx.query: \n\n', ctx.query);
+    console.log('ctx: \n\n', ctx);
+
+    const url = "https://getpocket.com/v3/oauth/authorize";
+    const reqBody2 = {
+      "consumer_key":"75265-200ad444b793e02ce01ec6cb",
+      "code":ctx.query.requestToken
+    };
+
+    await fetch(url,{
+      method: 'post',
+      headers: {
+        "Host": "getpocket.com",
+        "content-type": "application/json; charset=UTF-8",
+        "X-Accept": "application/json"
+      },
+      body: JSON.stringify(reqBody2)
+    }).then(response => response.json())
+      .then(response => {
+        console.log(`response from getAuthToken= \n\n`, response);
+        // redirect user to the dashboard route on my front end with the access token and my username
+        ctx.redirect(`http://localhost:3001/dashboard/${response.access_token}/${response.username}`);
+        // TODO everytime here we need a function that checks our database for a user by this name. If there isn't, make a new document and store the user's username and accessToken.
+      })
+      .catch(error => console.error('Error', JSON.parse(JSON.stringify(error))));
+    };
+
+
 
 // exports.getOne = async ctx => {
 //   try {
