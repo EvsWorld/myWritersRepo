@@ -9,6 +9,7 @@ class Layout extends Component {
         <ul>
           <li><Link to="/">Home</Link> </li>
           <li><Link to="/dashboard">Dashboard</Link></li>
+          <li><Link to="/fake">Fake</Link></li>
         </ul>
       </div>
     );

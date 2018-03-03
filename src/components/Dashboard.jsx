@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
 import { Route } from 'react-router-dom';
+import Fake  from './Fake';
+const btoa = require('btoa');
+
 // import { Route } from 'react-router';
 // import {Card, CardActions, CardHeader, CardMedia, CardTitle, CardText} from 'material-ui/Card';
 // import FlatButton from 'material-ui/FlatButton';
@@ -26,34 +29,17 @@ class Dashboard extends Component {
 
   fetchArticles = () => {
 
-    const url = "https://getpocket.com/v3/get";
-    const reqBody = {
-      "consumer_key":"75265-200ad444b793e02ce01ec6cb",
-      "access_token": this.props.match.params.access_token
-    };
-
-    fetch(url,{
-      method: 'post',
+    // this is a regular fetch to my server at it's get-articles route
+    fetch('http://localhost:3000/get-articles',{
       headers: {
         'Host': 'getpocket.com',
-        'Content-Type': 'application/json',
-        'X-Accept': 'application/json'
-      },
-      mode: 'no-cors',
-      body: JSON.stringify(reqBody)
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': `Basic ${btoa(`access_token:${this.props.match.params.accessToken}`)}`
+      }
     }).then(response => response.json())
       .then(parsedJson => {
-        console.log(`response from fetch from pocket API= \n\n`, parsedJson);
-
-      //               let result = '<p> url: </p>';
-      //               parsedJson.forEach((article) => {
-      //                   result +=
-      //                    `<h4> Article ID: ${article.id} </h4>
-      //                    <ul>
-      //                      <li> Article title : ${article.title}</li>
-      //                      <li> Article body : ${article.body} </li>
-      //                   </ul>
-      //                    `;
+        console.log(`response from my server \n\n`, parsedJson);
+        // this is where to store in local storage
 
       })
       .catch(error => console.error('Error', error ));
@@ -72,7 +58,6 @@ class Dashboard extends Component {
       <div className="Dashboard">
         This is Dashboard.jsx
         {/* {result} */}
-        {/* <Route path="/fakeComponent" component={Fake}/> */}
       </div>
 
     );
