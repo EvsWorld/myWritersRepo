@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import { Route } from 'react-router-dom';
+import Fake from './Fake';
+const btoa = require('btoa');
 // import { Route } from 'react-router';
 // import {Card, CardActions, CardHeader, CardMedia, CardTitle, CardText} from 'material-ui/Card';
 // import FlatButton from 'material-ui/FlatButton';
@@ -42,20 +44,12 @@ class Dashboard extends Component {
 
   fetchArticles = () => {
 
-    const url = "https://getpocket.com/v3/get";
-    const reqBody = {
-      "consumer_key":"75265-200ad444b793e02ce01ec6cb",
-      "access_token": this.props.match.params.access_token
-    };
-
-    fetch(url,{
-      method: 'post',
+    fetch('http://localhost:3000/get-articles',{
       headers: {
-        "Host": "getpocket.com",
-        "content-type": "application/json; charset=UTF-8",
-        "X-Accept": "application/json"
-      },
-      body: JSON.stringify(reqBody)
+       'Host': 'getpocket.com',
+       'Content-Type': 'application/x-www-form-urlencoded',
+       'Authorization': `Basic ${btoa(`access_token:${this.props.match.params.accessToken}`)}`
+     }
     }).then(response => response.json())
       .then(parsedJson => {
         console.log(`response from fetch from pocket API= \n\n`, parsedJson);
@@ -87,8 +81,8 @@ class Dashboard extends Component {
       <div className="Dashboard">
         This is Dashboard.jsx
         {/* {result} */}
-        <Route path=
-          </div>
+        <Route path='/fake' component= {Fake}/>
+      </div>
 
           );
           }
