@@ -46,6 +46,7 @@ class Dashboard extends Component {
 
     fetch('http://localhost:3000/get-articles',{
       headers: {
+       'Access-Control-Allow-Origin': '*',
        'Host': 'getpocket.com',
        'Content-Type': 'application/x-www-form-urlencoded',
        'Authorization': `Basic ${btoa(`access_token:${this.props.match.params.accessToken}`)}`

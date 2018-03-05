@@ -1,11 +1,16 @@
 // controller
 
 'use strict';
+require('events').EventEmitter.prototype._maxListeners = 500;
+
 const fetch = require('isomorphic-fetch');
 const atob = require('atob');
-
-const scrap = require('../utils/scrape').nightmare;
+// QUESTION How to import this scrap function kind of like this?
+// const scrap = require('../utils/scrape').nightmare;
 const userModel = require('../models/user');
+
+const Nightmare = require('nightmare')
+const nightmare = Nightmare({ show: true })
 
 // send request to pocket for the (temporary) 'request_token' which is needed to send with the 'redirect' to pocket's login page where the use will put in their credentials and then that redirect returns to me just saying 'OK'. That redirect actually has a redirect which tells it to come back to my 'authorize' route.
 exports.pocketSignIn = async ctx => {
@@ -83,7 +88,9 @@ exports.pocketSignIn = async ctx => {
       const url = 'https://getpocket.com/v3/get';
       const reqBody = {
         'consumer_key':'75265-200ad444b793e02ce01ec6cb',
-        'access_token': accessToken
+        'access_token': accessToken,
+        'detailType': 'simple',
+        'count': 20
       };
 
       await fetch(url, {
@@ -96,27 +103,96 @@ exports.pocketSignIn = async ctx => {
         body: JSON.stringify(reqBody)
       })
       .then(res => res.json())
-      .then( articles => {
-        console.log('getArticles response: ', articles);
+      .then( parsedJson => {
+        console.log('getArticles response: ', parsedJson);
         // TODO func to loop over objects and scrape the page for the author.
-        ctx.body = articles;
+        return getArrOfWriters(parsedJson.list);
+      })
+      .then(titles => {
+        // TODO: query google news api for the titles provided
+
       });
     };
 
 
-    // TODO: func to accept array of objects, scrape the page and return that article's author.
-    // const getArrOfWriters = async (artArr) => {
-    //   const writers = await artArr.forEach({
-    //     nightmare
-    //       .goto(artArr.list.url)
-    //       .evaluate(() => document.querySelector('h1').innerHTML)
-    //       .end()
-    //       .then(console.log)
-    //       .catch(error => {
-    //         console.error('Search failed:', error)
-    //       })
+    // const foo = () => {
+    //   return somethingAsync()
+    // };
     //
-    //   });
+    // foo()
+    // .then()
+    // .catch()
+
+
+    // TODO: func to accept object article objects, and for every object, scrap the page for the title, then search the news api for for those terms, then return the author of the article.
+    const getArrOfWriters = async (artArr) => {
+      let i = 0;
+      const titles = await Promise.map(Object.keys(artArr).slice(0,30)
+      .map(key => fetch(artArr[key].given_url)
+        .then(res => {
+          if(res.status !== 200) throw new Error('Not succeeded');
+          return res;
+        })
+        .then(res => res.text())
+        .then(html => /<title>([^\<]*)<\/title>/.exec(html)[1])
+        .catch(e => {})
+      ));
+      console.log(titles);
+      return titles;
+    };
+
+    
+
+    Promise.map = (promises) => {
+      return new Promise((resolve, reject) => {
+        let counter = 0;
+        const results = [];
+
+        const checkCounter = () => {
+          counter--;
+          console.log(counter);
+          if(counter === 0) resolve(results);
+        }
+
+        promises.forEach(promise => {
+          counter++;
+          console.log(counter);
+          promise
+          .then(result => {
+            results.push({
+              promise,
+              result
+            });
+            checkCounter();
+          })
+          .catch((e) => {
+            results.push({
+              promise,
+              result:null
+            });
+            checkCounter();
+          })
+        });
+      })
+    }
+    // const getArrOfWriters = async (artArr) => {
+    //   const writers = await Promise.all(Object.keys(artArr)
+    //   .map(key => nightmare.goto(artArr[key].given_url)
+    //     .evaluate(() => document.querySelector('h1').innerHTML)
+    //     .end()
+    //     .then(searchTerm => queryNewsAsync(searchTerm))
+    //     .then(authorName => {
+    //       console.log('authorName', authorName);
+    //       return authorName;
+    //     })
+    //     .catch(error => {
+    //       console.error('Search failed:', error.message);
+    //       console.error('URL', artArr[key].given_url);
+    //       console.error('========================');
+    //     })
+    //   ));
+    //   console.log(writers);
+    //   return writers;
     // };
 
     // TODO: func to accept array of authors and find the top 15 most common. // TODO: func to display those writers
