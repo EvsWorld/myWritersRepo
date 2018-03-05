@@ -4,6 +4,7 @@
 const fetch = require('isomorphic-fetch');
 const atob = require('atob');
 
+const scrap = require('../utils/scrap.js').nightmare;
 const userModel = require('../models/user');
 
 // send request to pocket for the (temporary) 'request_token' which is needed to send with the 'redirect' to pocket's login page where the use will put in their credentials and then that redirect returns to me just saying 'OK'. That redirect actually has a redirect which tells it to come back to my 'authorize' route.
@@ -98,40 +99,16 @@ exports.pocketSignIn = async ctx => {
       .then(res => res.json())
       .then( articles => {
         console.log('getArticles response: ', articles);
-        ctx.body= articles;
+        // TODO func to loop over objects and scrape the page for the author.
+        ctx.body = articles;
       });
     };
 
 
+    // TODO: func to accept array of objects, scrape the page and return that article's author.
+    const   = () => {
 
-// exports.getOne = async ctx => {
-//   try {
-//     const topic = await topicModel.getOne(ctx.params.id);
-//     ctx.body = topic;
-//   } catch (e) {
-//     ctx.status = 500;
-//   }
-// };
+    };
 
-// exports.find = async ctx => {
-//   try {
-//     const topic = await topicModel.find(ctx.params.name);
-//     ctx.body = topic;
-//   } catch (e) {
-//     ctx.status = 500;
-//   }
-// };
-
-
-// exports.create = async ctx => {
-//   let id = await topicModel.getHighestId();
-//   id = id[0].id + 1;
-//   const randImg = Math.floor(Math.random() * 151) + 150
-//   const newPokemon = {
-//     id,
-//     img: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/topic/${randImg}.png`,
-//     name: ctx.request.body.name
-//   }
-//   await topicModel.create(newPokemon);
-//   ctx.status = 201;
-// }
+    // TODO: func to accept array of authors and find the top 15 most common. // TODO: func to display those writers
+    // TODO: func to follow those writers on twitter

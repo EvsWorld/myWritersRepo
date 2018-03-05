@@ -1,8 +1,5 @@
 import React, { Component } from 'react';
 import { Route } from 'react-router-dom';
-import Fake  from './Fake';
-const btoa = require('btoa');
-
 // import { Route } from 'react-router';
 // import {Card, CardActions, CardHeader, CardMedia, CardTitle, CardText} from 'material-ui/Card';
 // import FlatButton from 'material-ui/FlatButton';
@@ -26,20 +23,52 @@ class Dashboard extends Component {
     // console.log(this.props.match.params.username);
   }
 
+ // example of fetch and forEach:
+ // fetch('https://jsonplaceholder.typicode.com/posts')
+ //           .then((res) => { return res.json() })
+ //           .then((data) => {
+ //               let result = '<h2> Users Info </h2>';
+ //               data.forEach((user) => {
+ //                   result +=
+ //                    `<h4> User ID: ${user.id} </h4>
+ //                    <ul>
+ //                      <li> User tittle : ${user.title}</li>
+ //                      <li> User body : ${user.body} </li>
+ //                   </ul>
+ //                    `;
+ //               document.getElementById('result').innerHTML = result;
+
+  // // TODO: function to fetch articles for the user. return an array of "article" objects
 
   fetchArticles = () => {
 
-    // this is a regular fetch to my server at it's get-articles route
-    fetch('http://localhost:3000/get-articles',{
+    const url = "https://getpocket.com/v3/get";
+    const reqBody = {
+      "consumer_key":"75265-200ad444b793e02ce01ec6cb",
+      "access_token": this.props.match.params.access_token
+    };
+
+    fetch(url,{
+      method: 'post',
       headers: {
-        'Host': 'getpocket.com',
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${btoa(`access_token:${this.props.match.params.accessToken}`)}`
-      }
+        "Host": "getpocket.com",
+        "content-type": "application/json; charset=UTF-8",
+        "X-Accept": "application/json"
+      },
+      body: JSON.stringify(reqBody)
     }).then(response => response.json())
       .then(parsedJson => {
-        console.log(`response from my server \n\n`, parsedJson);
-        // this is where to store in local storage
+        console.log(`response from fetch from pocket API= \n\n`, parsedJson);
+
+      //               let result = '<p> url: </p>';
+      //               parsedJson.forEach((article) => {
+      //                   result +=
+      //                    `<h4> Article ID: ${article.id} </h4>
+      //                    <ul>
+      //                      <li> Article title : ${article.title}</li>
+      //                      <li> Article body : ${article.body} </li>
+      //                   </ul>
+      //                    `;
 
       })
       .catch(error => console.error('Error', error ));
@@ -58,12 +87,13 @@ class Dashboard extends Component {
       <div className="Dashboard">
         This is Dashboard.jsx
         {/* {result} */}
-      </div>
+        <Route path=
+          </div>
 
-    );
-  }
+          );
+          }
 
-}
+          }
 
 
 export default Dashboard;
