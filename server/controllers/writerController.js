@@ -7,10 +7,8 @@ const fetch = require('isomorphic-fetch');
 const atob = require('atob');
 // QUESTION How to import this scrap function kind of like this?
 // const scrap = require('../utils/scrape').nightmare;
-const userModel = require('../models/user');
 
-const Nightmare = require('nightmare')
-const nightmare = Nightmare({ show: true })
+const queryNewsAsync = require('../utils/search.js').queryNewsAsync;
 
 // send request to pocket for the (temporary) 'request_token' which is needed to send with the 'redirect' to pocket's login page where the use will put in their credentials and then that redirect returns to me just saying 'OK'. That redirect actually has a redirect which tells it to come back to my 'authorize' route.
 exports.pocketSignIn = async ctx => {
@@ -65,7 +63,7 @@ exports.pocketSignIn = async ctx => {
       body: JSON.stringify(reqBody)
     }).then(response => response.json())
       .then(response => {
-        console.log(`response from getAuthToken= \n\n`, response);
+        // console.log(`response from getAuthToken= \n\n`, response);
         // redirect user to the dashboard route on my front end with the access token and my username
         ctx.redirect(`http://localhost:3001/dashboard/${response.access_token}/${response.username}`);
         // TODO everytime here we need a function that checks our database for a user by this name. If there isn't, make a new document and store the user's username and accessToken.
@@ -76,14 +74,14 @@ exports.pocketSignIn = async ctx => {
     // returns an array of all the urls of all the articles the user has read.
     exports.getArticles = async ctx => {
       let articleUrls = [];  // TODO let or const?
-      console.log('You hit the getArticles controller!!!\n\n');
-      console.log('ctx.query: \n\n', ctx.query);
-      console.log('ctx: \n\n', ctx);
+      // console.log('You hit the getArticles controller!!!\n\n');
+      // console.log('ctx.query: \n\n', ctx.query);
+      // console.log('ctx: \n\n', ctx);
       const encodedUserData = ctx.headers['authorization'].split(' ')[1];
-      console.log('encodedUserData', encodedUserData);
+      // console.log('encodedUserData', encodedUserData);
       const userData = atob(encodedUserData);
       const accessToken = userData.split(':')[1];
-      console.log('accessToken: ', accessToken);
+      // console.log('accessToken: ', accessToken);
 
       const url = 'https://getpocket.com/v3/get';
       const reqBody = {
@@ -104,28 +102,23 @@ exports.pocketSignIn = async ctx => {
       })
       .then(res => res.json())
       .then( parsedJson => {
-        console.log('getArticles response: ', parsedJson);
+        // console.log('getArticles response: ', parsedJson);
         // TODO func to loop over objects and scrape the page for the author.
-        return getArrOfWriters(parsedJson.list);
+        return getArrOfTitles(parsedJson.list);
       })
       .then(titles => {
         // TODO: query google news api for the titles provided
+        // console.log('getArrOfWriters: ', getArrOfWriters(titles));
+        return getArrOfWriters(titles);
+      }).then( writers => {
+        console.log(writers);
 
-      });
+      })
     };
 
 
-    // const foo = () => {
-    //   return somethingAsync()
-    // };
-    //
-    // foo()
-    // .then()
-    // .catch()
-
-
     // TODO: func to accept object article objects, and for every object, scrap the page for the title, then search the news api for for those terms, then return the author of the article.
-    const getArrOfWriters = async (artArr) => {
+    const getArrOfTitles = async (artArr) => {
       let i = 0;
       const titles = await Promise.map(Object.keys(artArr).slice(0,30)
       .map(key => fetch(artArr[key].given_url)
@@ -137,11 +130,30 @@ exports.pocketSignIn = async ctx => {
         .then(html => /<title>([^\<]*)<\/title>/.exec(html)[1])
         .catch(e => {})
       ));
-      console.log(titles);
+      // console.log(titles);
       return titles;
     };
 
-    
+    const getArrOfWriters = async (titArr) => {
+      let i = 0;
+      const writers = await
+      Promise.map(Object.keys(titArr).slice(0,30)
+      .map(key => {
+        // console.log('queryNewsAsync(key): ', queryNewsAsync(key) );
+        // console.log('titArr[key]: ', titArr[key]);
+        return queryNewsAsync(key);
+      }));
+      //   .then(res => {
+      //     if(res.status !== 200) throw new Error('one of getArrOfWriters Not succeeded');
+      //     return res;
+      //   })
+      //     .then(res => res.json())
+      //     .catch(e => {})
+      // );
+        // console.log('writers from getArrOfWriters: ', writers());
+        // ctx.body = writers();
+        return writers;
+    };
 
     Promise.map = (promises) => {
       return new Promise((resolve, reject) => {
