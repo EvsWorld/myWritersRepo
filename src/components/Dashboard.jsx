@@ -51,9 +51,11 @@ class Dashboard extends Component {
        'Content-Type': 'application/x-www-form-urlencoded',
        'Authorization': `Basic ${btoa(`access_token:${this.props.match.params.accessToken}`)}`
      }
-    }).then(response => response.json())
-      .then(parsedJson => {
-        console.log(`response from fetch from pocket API= \n\n`, parsedJson);
+   }).then(response => {
+     console.log('response: ', response);
+   })
+    .then(parsedJson => {
+      console.log(`response from fetch from pocket API= \n\n`, parsedJson);
 
       //               let result = '<p> url: </p>';
       //               parsedJson.forEach((article) => {

@@ -1,93 +1,31 @@
 const NewsAPI = require('newsapi');
-const newsapi = new NewsAPI('37e7bdd84e8b4ea89ec597b6621c1216');
+const newsapi = new NewsAPI('5e623c2dbc134cb3a6827b919f4c15ff');
+var URL = require('url-parse');
 
-const isSimilar = (s1, s2) => {
-  var longer = s1;
-  var shorter = s2;
- if (s1.length < s2.length) {
-   longer = s2;
-   shorter = s1;
- }
- var longerLength = longer.length;
- if (longerLength == 0) {
-   return 1.0;
- }
- console.log(((longerLength - editDistance(longer, shorter)) / parseFloat(longerLength) ) >= 0.5);
-
- return (((longerLength - editDistance(longer, shorter)) / parseFloat(longerLength) ) >= 0.5);
-
- function editDistance(s1, s2) {
-      s1 = s1.toLowerCase();
-      s2 = s2.toLowerCase();
-
-      var costs = new Array();
-      for (var i = 0; i <= s1.length; i++) {
-        var lastValue = i;
-        for (var j = 0; j <= s2.length; j++) {
-          if (i == 0)
-            costs[j] = j;
-          else {
-            if (j > 0) {
-              var newValue = costs[j - 1];
-              if (s1.charAt(i - 1) != s2.charAt(j - 1))
-                newValue = Math.min(Math.min(newValue, lastValue),
-                  costs[j]) + 1;
-              costs[j - 1] = lastValue;
-              lastValue = newValue;
-            }
-          }
-        }
-        if (i > 0)
-          costs[s2.length] = lastValue;
-      }
-      return costs[s2.length];
-    }
-}
-
-
-// const isSimilar = (a, b) => {
-//   let matchNum = (a < b) ? (b.length)*0.6 :
-//   (a.length*0.5);
-//   let count = 0;
-//   for (let i of a.length) {
-//     for (let j of b.length) {
-//       if (b.j === a.i) count++;
-//     }
-//   }
-//   return (count >= matchNum);
-// }
-
-// takes a sigle article title (string)
+// takes a single article object
 // returns the author
-exports.queryNewsAsync =  async (titleQuery) => {
+exports.queryNewsAsync =  async (artObj) => {
   try {
-    // const query = makeQueryString(searchUrl);
-    // const sources = await getSourcesAsync();
     return await newsapi.v2.everything({
-      q: titleQuery,
-      // sources: `'${sourcesCall}'`,
-      // sources: source s,
-      // domains: 'washingtonpost.com',
-      // from: '2017-12-01',
-      // to: '2017-12-12',
+      q: artObj.resolved_title,
       language: 'en',
       sortBy: 'relevance',
-      // page: 2
     }).then(response => {
       // console.log('\nresponse frowm newsapi search: \n\n', response);
       return response.articles.map(art => {
-        console.log('art.title: ', art.title);
-        console.log('titleQuery: ', titleQuery);
-        if (isSimilar(art.title, titleQuery)) {
+        // console.log('art.resolved_url: ', art.resolved_url);
+        // console.log('art: ', art);
+        if (isURLSame(art.url, artObj.resolved_url)) {
           console.log('\nWE HAVE A MATCH!!\n');
+          console.log('artObj.url: ', artObj.resolved_url);
           console.log(`1. art.url = `, art.url);
           console.log('2. art.author = ', art.author);
-          // console.log('3. Input search url...', searchUrl);
-          console.log(`3. news id...`, art.source.id);
-          // console.log(`5. queryReturns...`, tempReturn);
-          return art.author
+          console.log(`3. news id...`, art.source.id, '\n\n\n');
+          return art.author;
         }
-        // else return "the title for this article does not match the title you're searching for :("
+        else {
+          return 'search result that didnt match the url';
+        }
       });
     });
   } catch (err) {
@@ -95,9 +33,11 @@ exports.queryNewsAsync =  async (titleQuery) => {
   }
 };
 
-// isSimilar('i love you, you love me', 'i love');
-
-// exports.queryNewsAsync('The Chaos After Trump - The New York Times')
+const isURLSame = (url1, url2) => {
+  let urlObj1 = URL(url1, true);
+  let urlObj2 = URL(url2, true);
+  return ( urlObj1.hostname===urlObj2.hostname ) && ( urlObj1.pathname===urlObj2.pathname );
+}
 
 //TODO func to return query string (didn't end up using, but its a good function)
 // const makeQueryString = (url) => {

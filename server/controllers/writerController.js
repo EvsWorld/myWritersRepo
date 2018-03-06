@@ -88,9 +88,10 @@ exports.pocketSignIn = async ctx => {
         'consumer_key':'75265-200ad444b793e02ce01ec6cb',
         'access_token': accessToken,
         'detailType': 'simple',
+        'contentType': 'article',
         'count': 50,
         'sort': 'newest',
-        'tag': 'parents'
+        // 'tag': 'parents'
       };
 
       await fetch(url, {
@@ -105,13 +106,11 @@ exports.pocketSignIn = async ctx => {
       .then(res => res.json())
       .then( articles => {
         // console.log('getArticles response: ', articles.list);
-        return scrapeArrOfTitles(articles.list);
-      })
-      .then(titles => {
-        return getArrOfWriters(titles);
+        return getAuthors(articles.list);
       })
       .then(writers => {
-        console.log(writers);
+        console.log('writers: ', writers,'\n');
+        ctx.body = writers;
       })
       // .then( writers => {
       //   console.log(writers);
@@ -121,44 +120,37 @@ exports.pocketSignIn = async ctx => {
 
     // func to accept array of article objects, and for every object, scrap the page for the title.
     // returns array of objects (promis and title as keys)
-    const scrapeArrOfTitles = async (artArr) => {
+    const getAuthors = async (artArr) => {
       let i = 0;
-      const titles = await Promise.map(Object.keys(artArr).slice(0,30)
-      .map(key => fetch(artArr[key].given_url)
-        .then(res => {
-          if(res.status !== 200) throw new Error('Not succeeded');
-          return res;
-        })
-        .then(res => res.text())
-        .then(html => /<title>([^\<]*)<\/title>/.exec(html)[1])
-        .catch(e => {})
-      ));
-      // console.log('Output of scrapeArrOfTitles: ', titles);
-      return titles;
+
+      Promise.all(Object.keys(artArr).map(articleId => {
+        return queryNewsAsync(artArr[articleId])
+      })).then(response => {
+        console.log('THE TITLES ARE:\n',response)
+        return response
+      })
+
+      // const titles = await Promise.map(Object.keys(artArr)
+      // .map(key => {
+      //   // console.log('\nthis is an input into queryNewsAsync:', artArr[key], `And it's type is:  `, typeof(artArr[key]), '\n' );
+      //   console.log('this is queryNewsAsync: ', queryNewsAsync(artArr[key]));
+      //   return queryNewsAsync(artArr[key]);
+      // }));
+      // return Promise.map(titles);
     };
 
     // accepts array of titles, and calls the search api function which returns the author.
     // returns array of authors
     // syncronously returning and an array of promises that can be awaited/resolved later
-    const getArrOfWriters = (titArr) => {
-      let i = 0;
-      const writersPromises = titArr
-      .map(title => {
-        console.log('this is an input into queryNewsAsync:', title.result);
-        return queryNewsAsync(title.result);
-      });
-      return  Promise.map(writersPromises);
-      //   .then(res => {
-      //     if(res.status !== 200) throw new Error('one of getArrOfWriters Not succeeded');
-      //     return res;
-      //   })
-      //     .then(res => res.json())
-      //     .catch(e => {})
-      // );
-        // console.log('writers from getArrOfWriters: ', writers);
-        // ctx.body = writers();
-        // return writers;
-    };
+    // const getArrOfWriters = (titArr) => {
+    //   let i = 0;
+    //   const writersPromises = titArr
+    //   .map(title => {
+    //     console.log('this is an input into queryNewsAsync:', title.result);
+    //     return queryNewsAsync(title.result);
+    //   });
+    //   return  Promise.map(writersPromises);
+    // };
 
     // QUESTION: Arol wrote this; how does it work?
     // SO promises is an array of promises
@@ -198,7 +190,7 @@ exports.pocketSignIn = async ctx => {
     }
     // const getArrOfWriters = async (artArr) => {
     //   const writers = await Promise.all(Object.keys(artArr)
-    //   .map(key => nightmare.goto(artArr[key].given_url)
+    //   .map(key => nightmare.goto(artArr[key].resolved_url)
     //     .evaluate(() => document.querySelector('h1').innerHTML)
     //     .end()
     //     .then(searchTerm => queryNewsAsync(searchTerm))
@@ -208,7 +200,7 @@ exports.pocketSignIn = async ctx => {
     //     })
     //     .catch(error => {
     //       console.error('Search failed:', error.message);
-    //       console.error('URL', artArr[key].given_url);
+    //       console.error('URL', artArr[key].resolved_url);
     //       console.error('========================');
     //     })
     //   ));
