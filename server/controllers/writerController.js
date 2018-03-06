@@ -88,7 +88,9 @@ exports.pocketSignIn = async ctx => {
         'consumer_key':'75265-200ad444b793e02ce01ec6cb',
         'access_token': accessToken,
         'detailType': 'simple',
-        'count': 20
+        'count': 50,
+        'sort': 'newest',
+        'tag': 'parents'
       };
 
       await fetch(url, {
@@ -101,24 +103,25 @@ exports.pocketSignIn = async ctx => {
         body: JSON.stringify(reqBody)
       })
       .then(res => res.json())
-      .then( parsedJson => {
-        // console.log('getArticles response: ', parsedJson);
-        // TODO func to loop over objects and scrape the page for the author.
-        return getArrOfTitles(parsedJson.list);
+      .then( articles => {
+        // console.log('getArticles response: ', articles.list);
+        return scrapeArrOfTitles(articles.list);
       })
       .then(titles => {
-        // TODO: query google news api for the titles provided
-        // console.log('getArrOfWriters: ', getArrOfWriters(titles));
         return getArrOfWriters(titles);
-      }).then( writers => {
-        console.log(writers);
-
       })
+      .then(writers => {
+        console.log(writers);
+      })
+      // .then( writers => {
+      //   console.log(writers);
+      //
+      // })
     };
 
-
-    // TODO: func to accept object article objects, and for every object, scrap the page for the title, then search the news api for for those terms, then return the author of the article.
-    const getArrOfTitles = async (artArr) => {
+    // func to accept array of article objects, and for every object, scrap the page for the title.
+    // returns array of objects (promis and title as keys)
+    const scrapeArrOfTitles = async (artArr) => {
       let i = 0;
       const titles = await Promise.map(Object.keys(artArr).slice(0,30)
       .map(key => fetch(artArr[key].given_url)
@@ -130,19 +133,21 @@ exports.pocketSignIn = async ctx => {
         .then(html => /<title>([^\<]*)<\/title>/.exec(html)[1])
         .catch(e => {})
       ));
-      // console.log(titles);
+      // console.log('Output of scrapeArrOfTitles: ', titles);
       return titles;
     };
 
-    const getArrOfWriters = async (titArr) => {
+    // accepts array of titles, and calls the search api function which returns the author.
+    // returns array of authors
+    // syncronously returning and an array of promises that can be awaited/resolved later
+    const getArrOfWriters = (titArr) => {
       let i = 0;
-      const writers = await
-      Promise.map(Object.keys(titArr).slice(0,30)
-      .map(key => {
-        // console.log('queryNewsAsync(key): ', queryNewsAsync(key) );
-        // console.log('titArr[key]: ', titArr[key]);
-        return queryNewsAsync(key);
-      }));
+      const writersPromises = titArr
+      .map(title => {
+        console.log('this is an input into queryNewsAsync:', title.result);
+        return queryNewsAsync(title.result);
+      });
+      return  Promise.map(writersPromises);
       //   .then(res => {
       //     if(res.status !== 200) throw new Error('one of getArrOfWriters Not succeeded');
       //     return res;
@@ -150,11 +155,14 @@ exports.pocketSignIn = async ctx => {
       //     .then(res => res.json())
       //     .catch(e => {})
       // );
-        // console.log('writers from getArrOfWriters: ', writers());
+        // console.log('writers from getArrOfWriters: ', writers);
         // ctx.body = writers();
-        return writers;
+        // return writers;
     };
 
+    // QUESTION: Arol wrote this; how does it work?
+    // SO promises is an array of promises
+    //
     Promise.map = (promises) => {
       return new Promise((resolve, reject) => {
         let counter = 0;
@@ -165,7 +173,8 @@ exports.pocketSignIn = async ctx => {
           console.log(counter);
           if(counter === 0) resolve(results);
         }
-
+        // funtion really startes here trying to resolve them
+        // pushes onto my results array, the promise and the resolved promise (the title)
         promises.forEach(promise => {
           counter++;
           console.log(counter);
