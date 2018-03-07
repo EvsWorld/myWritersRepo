@@ -84,7 +84,7 @@ class Dashboard extends Component {
   render () {
     return (
       <div className="Dashboard">
-        <h2>Writers</h2>
+        <h2><span>My</span> Writers</h2>
         {this.state.authors}
         {/* <Route path='/fake' component= {Fake}/> */}
       </div>

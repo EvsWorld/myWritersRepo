@@ -10,12 +10,12 @@ const loadJsonFile = require('load-json-file');
 //TODO: make this function add the date when it is created
 //TODO: Listen for the
 exports.findMatchingArticles = () => {
-
+  console.log('FINDMATCHINGARTICLES IS CALLED!!');
   loadJsonFile('/Users/evanhendrix1/google_drive/programming/codeWorks/mywriters/server/utils/manualUserData.json')
     .then(artArr => {
-      const articles = artArr.list;
-      Promise.all(Object.keys(articles).map(articleId => {
-          return exports.queryNewsAsync(articles[articleId])
+      Promise.all(Object.keys(artArr).map(articleId => {
+        // console.log('DOES THIS MAKE A SHIT???? YESSS');
+          return exports.queryNewsAsync(artArr[articleId])
         })
       ).then(response => {
         // filters empty arrays out
@@ -23,16 +23,14 @@ exports.findMatchingArticles = () => {
           if (a) return a
         });
         // TODO put authorsJson in an object, as a value; add in a data property for the date this runs, then json.stringify it
+        const testJson = JSON.stringify('blah blah blah testy test test')
         const authorsJson = JSON.stringify(authorsArr);
-      console.log('AUTHORSJSON:  ', authorsJson);
+        console.log('AUTHORSJSON:  ', authorsJson);
 
-      fs.writeFile('./usersAuthors.json', authorsJson,  function (err) {
-        if (err) throw err;
-        console.log('Saved authors to usersAuthors.json!');
-      });
-
-
-
+        fs.writeFile('./usersAuthors.json', testJson,  function (err) {
+          if (err) throw err;
+          console.log('Saved authors to usersAuthors.json!');
+        });
     })
     .catch(err => console.log(err));
   });
@@ -42,12 +40,13 @@ exports.findMatchingArticles = () => {
 // returns the author
 exports.queryNewsAsync =  async (artObj) => {
   try {
+    console.log('DOES THIS FROM queryNewsAsync make a SHIT????');
     return await newsapi.v2.everything({
       q: artObj.resolved_title,
       language: 'en',
       sortBy: 'relevance',
     }).then(response => {
-      // console.log('\nresponse frowm newsapi search: \n\n', response);
+      console.log('\nresponse frowm newsapi search: \n\n', response);
       const authorArrs = response.articles.filter(art =>
         isURLSame(art.url, artObj.resolved_url)
       ).map( art => {

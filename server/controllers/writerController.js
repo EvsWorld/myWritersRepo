@@ -92,7 +92,7 @@ exports.pocketSignIn = async ctx => {
         'access_token': accessToken,
         'detailType': 'simple',
         'contentType': 'article',
-        'count': 30,
+        'count': 60,
         'sort': 'newest',
         // 'tag': 'parents'
       };
@@ -120,7 +120,6 @@ exports.pocketSignIn = async ctx => {
           sortable.sort((x,y) => {
             return  y[1] - x[1] ;
           } );
-          console.log('result: ', result);
           console.log('sorted: ', sortable);
           ctx.body = sortable;
 
@@ -141,9 +140,9 @@ exports.pocketSignIn = async ctx => {
           .then(res => res.json())
           .then( parsedJson => {
             // console.log('getArticles response: ', parsedJson.list);
-            fs.writeFile('/Users/evanhendrix1/google_drive/programming/codeWorks/mywriters/server/utils/manualUserData.json', JSON.stringifyj(parsedJson.list),  function (err) {
+            fs.writeFile('/Users/evanhendrix1/google_drive/programming/codeWorks/mywriters/server/utils/manualUserData.json', JSON.stringify(parsedJson.list),  function (err) {
               if (err) throw err;
-              console.log('Saved articles to manualUserData, now calling findMatchingArticles!');
+              console.log('Saved articles to manualUserData, now calling findMatchingArticles!\n\n');
               return findMatchingArticles();
             });
           })
