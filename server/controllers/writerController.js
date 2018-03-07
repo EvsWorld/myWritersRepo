@@ -112,6 +112,7 @@ exports.pocketSignIn = async ctx => {
               result[a] = 1;
             }
           });
+          // result.sort();
           console.log(result);
           ctx.body = result;
 

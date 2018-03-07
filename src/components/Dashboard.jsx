@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Route } from 'react-router-dom';
 import Fake from './Fake';
 const btoa = require('btoa');
+let uniqid = require('uniqid');
 // import { Route } from 'react-router';
 // import {Card, CardActions, CardHeader, CardMedia, CardTitle, CardText} from 'material-ui/Card';
 // import FlatButton from 'material-ui/FlatButton';
@@ -17,10 +18,10 @@ class Dashboard extends Component {
     super(props);
     this.state = {
       authors: [],
-    }
+    };
   }
-  componentDidMount () {
-    this.fetchArticles ();
+  componentWillMount () {
+    this.fetchArticles();
     console.log('params: \n',this.props.match.params);
     // console.log(this.props.match.params.username);
   }
@@ -44,7 +45,7 @@ class Dashboard extends Component {
 
   fetchArticles = () => {
 
-    fetch('http://localhost:3000/get-articles',{
+    fetch('http://localhost:3000/get-articles', {
       headers: {
        'Access-Control-Allow-Origin': '*',
        'Host': 'getpocket.com',
@@ -52,46 +53,44 @@ class Dashboard extends Component {
        'Authorization': `Basic ${btoa(`access_token:${this.props.match.params.accessToken}`)}`
      }
    }).then(response => {
-     console.log('response: ', response);
-     return response.json();
-   })
-    .then(parsedJson => {
-      console.log(`response from fetch from pocket API= \n\n`, parsedJson);
-
-      //               let result = '<p> url: </p>';
-      //               parsedJson.forEach((article) => {
-      //                   result +=
-      //                    `<h4> Article ID: ${article.id} </h4>
-      //                    <ul>
-      //                      <li> Article title : ${article.title}</li>
-      //                      <li> Article body : ${article.body} </li>
-      //                   </ul>
-      //                    `;
-
+       return response.json();
+   }).then(authors => {
+      console.log(`response from fetch from pocket API= \n\n`, authors);
+      let count = 0;
+      let blahCount = '';
+      let authorsResult = '<p> Writers: </p>';
+      let renderAuthors = Object.keys(authors).map( name => {
+        // console.log(writer);
+        // count ++;
+        // blahCount += 'blah ';
+        return (
+          <div key={uniqid()}>
+            <h4> You liked {name} {authors[name]} times!</h4>
+            {/* <ul>
+              <li> Count : ${count}</li>
+              <li> Blahs : ${blahCount} </li>
+            </ul> */}
+          </div>
+        )
       })
-      .catch(error => console.error('Error', error ));
-    }
-
-    // TODO: func to accept array of objects, scrape the page and return that article's author.
-    // TODO: func to accept array of authors and find the top 15 most common. // TODO: func to display those writers
-    // TODO: func to follow those writers on twitter
-
-
+      this.setState({authors: renderAuthors});
+      console.log('state: ', this.state);
+    })
+    .catch(error => console.error('Error', error ));
+  }
 
     // console.log(this.props.match.params.accessToken);
 
   render () {
     return (
       <div className="Dashboard">
-        This is Dashboard.jsx
-        {/* {result} */}
-        <Route path='/fake' component= {Fake}/>
+        Writers
+        {this.state.authors}
+        {/* <Route path='/fake' component= {Fake}/> */}
       </div>
-
-          );
-          }
-
-          }
+      );
+  }
+}
 
 
 export default Dashboard;
