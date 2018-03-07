@@ -11,7 +11,7 @@ let _ = require('lodash');
 // QUESTION How to import this scrap function kind of like this?
 // const scrap = require('../utils/scrape').nightmare;
 
-const queryNewsAsync = require('../utils/search.js').queryNewsAsync;
+// const queryNewsAsync = require('../utils/search.js').queryNewsAsync;
 
 // send request to pocket for the (temporary) 'request_token' which is needed to send with the 'redirect' to pocket's login page where the use will put in their credentials and then that redirect returns to me just saying 'OK'. That redirect actually has a redirect which tells it to come back to my 'authorize' route.
 exports.pocketSignIn = async ctx => {
@@ -98,59 +98,71 @@ exports.pocketSignIn = async ctx => {
       };
 
       // if "nothing in userData.json" then make this fetch
-      loadJsonFile('../utils/userData.json').then(data => {
-        if (_.isEmpty(data) ) {
+      await loadJsonFile('/Users/evanhendrix1/google_drive/programming/codeWorks/mywriters/server/utils/usersAuthors.json')
+      .then(data => {
+        console.log('HEYYYYY');
+        if (!_.isEmpty(data) ) {
           console.log(data);
+          //TODO tally most popular writers and send this data to the browser!
+          ctx.body = data;
+
         }
         // else {
-          // TODO somehow process this and turn send to front end
+          // TODO run the fetch to pocket that then writes to my manualUserData.json file.
+          // TODO trigger some kind of event that the manuaWriteToJson.js file is listening for.
         // }
       });
 
-      await fetch(url, {
-        method: 'post',
-        headers: {
-          "Host": "getpocket.com",
-          "content-type": "application/json; charset=UTF-8",
-          "X-Accept": "application/json"
-        },
-        body: JSON.stringify(reqBody)
-      })
-      .then(res => res.json())
-      .then( parsedJson => {
-        // console.log('getArticles response: ', parsedJson.list);
-        return getAuthors(parsedJson.list);
-      })
-      .then(writers => {
-        console.log('writers: ', writers,'\n');
-        ctx.body = writers;
-      })
-      // .then( writers => {
-      //   console.log(writers);
-      //
-      // })
+    //
+    //   await fetch(url, {
+    //     method: 'post',
+    //     headers: {
+    //       "Host": "getpocket.com",
+    //       "content-type": "application/json; charset=UTF-8",
+    //       "X-Accept": "application/json"
+    //     },
+    //     body: JSON.stringify(reqBody)
+    //   })
+    //   .then(res => res.json())
+    //   .then( parsedJson => {
+    //     // console.log('getArticles response: ', parsedJson.list);
+          // fs.writeFile('./usersAuthors.json', authorsJson,  function (err) {
+          //   if (err) throw err;
+          //   console.log('Saved!');
+          // });
+    //   })
+    //   .then(writers => {
+    //     console.log('writers: ', writers,'\n');
+    //     ctx.body = writers;
+    //   })
+    //   // .then( writers => {
+    //   //   console.log(writers);
+    //   //
+    //   // })
+    //
+
     };
-
-    // func to accept array of article objects, and for every object, scrap the page for the title.
-    // returns array of objects (promis and title as keys)
-    const getAuthors = async (artArr) => {
-      let i = 0;
-
-      Promise.all(Object.keys(artArr).map(articleId => {
-          return queryNewsAsync(artArr[articleId])
-        })
-      ).then(response => {
-        const authorsForReal = response.filter(a => {
-          if (a) return a
-        });
-        // .filter( author => {
-        //   console.log('AUTHOR ', author);
-        //   return (!undefined && (author.length > 0) &)
-        // });
-      console.log('AUTHORSFORREAL: ', authorsForReal)
-      })
-    };
-
+    //
+    // // func to accept array of article objects, and for every object, scrap the page for the title.
+    // // returns array of objects (promis and title as keys)
+    // const getAuthors = async (artArr) => {
+    //   let i = 0;
+    //
+    //   Promise.all(Object.keys(artArr).map(articleId => {
+    //       return queryNewsAsync(artArr[articleId])
+    //     })
+    //   ).then(response => {
+    //     const authorsForReal = response.filter(a => {
+    //       if (a) return a
+    //     });
+    //     // .filter( author => {
+    //     //   console.log('AUTHOR ', author);
+    //     //   return (!undefined && (author.length > 0) &)
+    //     // });
+    //   console.log('AUTHORSFORREAL: ', authorsForReal)
+    //   })
+    // };
+    //
     // // JSSTUDY Not using for now    //
     // Promise.map = (promises) => {
     //   return new Promise((resolve, reject) => {

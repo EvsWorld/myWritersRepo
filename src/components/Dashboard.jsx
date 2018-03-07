@@ -53,6 +53,7 @@ class Dashboard extends Component {
      }
    }).then(response => {
      console.log('response: ', response);
+     return response.json();
    })
     .then(parsedJson => {
       console.log(`response from fetch from pocket API= \n\n`, parsedJson);

@@ -28,12 +28,12 @@ readWrite();
 
 
 
-  // fs.readFile(foo.json, 'utf8', function (err, data) {
-  //   try {
-  //     data = JSON.parse(data)
-  //     console.log(data);
-  //   } catch (e) {
-  //     // Catch error in case file doesn't exist or isn't valid JSON
-  //   }
-  //   if (data && data.msgs) db.msgs = data.msgs;
-  // });
+  fs.readFile('./foo.json', 'utf8', function (err, data) {
+    try {
+      data = JSON.parse(data)
+      console.log('this is data from fs.readfile:  ', data);
+    } catch (e) {
+      // Catch error in case file doesn't exist or isn't valid JSON
+    }
+    if (data && data.msgs) db.msgs = data.msgs;
+  });

@@ -2,14 +2,13 @@ const NewsAPI = require('newsapi');
 var fs = require('fs');
 // require('dotenv').load({ silent: true });
 // const newsapi = new NewsAPI(process.env.NEWS_APIKEY4);
-const newsapi = new NewsAPI('66b6e3e14a5b4a0497a649b9d0af79f7');
+const newsapi = new NewsAPI('fa9ba43991944057953a5832cd461017');
 var URL = require('url-parse');
 const writeJsonFile = require('write-json-file');
 const loadJsonFile = require('load-json-file');
 
-//TODO: CHeck if userAuthors.json is empty, if it is, call the queryNewsAsync function to get the authors for that user
-// if the the file is not empty, just return that data?
-
+//TODO: make this function add the date when it is created
+//TODO: Listen for the
 loadJsonFile('/Users/evanhendrix1/google_drive/programming/codeWorks/mywriters/server/utils/manualUserData.json')
   .then(artArr => {
     const articles = artArr.list;
@@ -18,12 +17,14 @@ loadJsonFile('/Users/evanhendrix1/google_drive/programming/codeWorks/mywriters/s
       })
     ).then(response => {
       // filters empty arrays out
-      const authorsForReal = response.filter(a => {
+      const authorsArr = response.filter(a => {
         if (a) return a
       });
-    console.log('AUTHORSFORREAL: ', authorsForReal)
+      // TODO put authorsJson in an object, as a value; add in a data property for the date this runs, then json.stringify it
+      const authorsJson = JSON.stringify(authorsArr);
+    console.log('AUTHORSJSON:  ', authorsJson);
 
-    fs.writeFile('./usersAuthors.json', authorsForReal.toString() , function (err) {
+    fs.writeFile('./usersAuthors.json', authorsJson,  function (err) {
       if (err) throw err;
       console.log('Saved!');
     });
