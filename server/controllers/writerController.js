@@ -104,6 +104,8 @@ exports.pocketSignIn = async ctx => {
         if (!_.isEmpty(data) ) {
           console.log(data);
           //TODO tally most popular writers and send this data to the browser!
+          j
+          console.log(data.join(","));
           ctx.body = data;
 
         }
