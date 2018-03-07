@@ -100,13 +100,20 @@ exports.pocketSignIn = async ctx => {
       // if "nothing in userData.json" then make this fetch
       await loadJsonFile('/Users/evanhendrix1/google_drive/programming/codeWorks/mywriters/server/utils/usersAuthors.json')
       .then(data => {
-        console.log('HEYYYYY');
         if (!_.isEmpty(data) ) {
-          console.log(data);
+          // console.log('this is data, ya fuck! ', data);
           //TODO tally most popular writers and send this data to the browser!
-          j
-          console.log(data.join(","));
-          ctx.body = data;
+          const result = {};
+          data.forEach( a => {
+            if (Object.keys(result).includes(a)) {
+              result[a] ++;
+            }
+            else {
+              result[a] = 1;
+            }
+          });
+          console.log(result);
+          ctx.body = result;
 
         }
         // else {
