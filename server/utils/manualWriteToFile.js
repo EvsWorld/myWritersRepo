@@ -1,18 +1,39 @@
 const NewsAPI = require('newsapi');
 var fs = require('fs');
-require('dotenv').load({ silent: true });
-const newsapi = new NewsAPI(process.env.NEWS_APIKEY4);
+// require('dotenv').load({ silent: true });
+// const newsapi = new NewsAPI(process.env.NEWS_APIKEY4);
+const newsapi = new NewsAPI('66b6e3e14a5b4a0497a649b9d0af79f7');
 var URL = require('url-parse');
 const writeJsonFile = require('write-json-file');
+const loadJsonFile = require('load-json-file');
 
 //TODO: CHeck if userAuthors.json is empty, if it is, call the queryNewsAsync function to get the authors for that user
 // if the the file is not empty, just return that data?
 
-loadJsonFile('./manualUserData.json').then(data => {
-  const authorObj = exports.queryNewsAsync(data);
-  console.log(authorObj);
-  return authorObj;
-}
+loadJsonFile('/Users/evanhendrix1/google_drive/programming/codeWorks/mywriters/server/utils/manualUserData.json')
+  .then(artArr => {
+    const articles = artArr.list;
+    Promise.all(Object.keys(articles).map(articleId => {
+        return exports.queryNewsAsync(articles[articleId])
+      })
+    ).then(response => {
+      // filters empty arrays out
+      const authorsForReal = response.filter(a => {
+        if (a) return a
+      });
+    console.log('AUTHORSFORREAL: ', authorsForReal)
+
+    fs.writeFile('./usersAuthors.json', authorsForReal.toString() , function (err) {
+      if (err) throw err;
+      console.log('Saved!');
+    });
+
+
+
+  })
+  .catch(err => console.log(err));
+});
+
 // takes a single article object
 // returns the author
 exports.queryNewsAsync =  async (artObj) => {
@@ -28,11 +49,8 @@ exports.queryNewsAsync =  async (artObj) => {
       ).map( art => {
         return art.author
       });
+
       console.log('authorArrs: ', authorArrs);
-    fs.appendFile('./usersAuthors.json', arrOfArrs.toString() , function (err) {
-      if (err) throw err;
-      console.log('Saved!');
-    });
 
     return authorArrs.toString()
     });
