@@ -6,8 +6,12 @@
     "atob": "^2.0.3",
     "btoa": "^1.1.2",
     "d3-dsv": "^1.0.8",
+    "dotenv": "^5.0.1",
     "es6-promise": "^4.2.4",
+    "fs": "0.0.1-security",
     "isomorphic-fetch": "^2.2.1",
+    "load-json-file": "^4.0.0",
+    "lodash": "^4.17.5",
     "newsapi": "^2.2.0",
     "nightmare": "^3.0.0",
     "react": "^16.2.0",
@@ -15,7 +19,8 @@
     "react-router-dom": "^4.2.2",
     "react-scripts": "1.1.1",
     "styled-components": "^3.1.6",
-    "url-parse": "^1.2.0"
+    "url-parse": "^1.2.0",
+    "write-json-file": "^2.3.0"
   },
   "scripts": {
     "start": "react-scripts start",

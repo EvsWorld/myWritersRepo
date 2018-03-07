@@ -1,6 +1,9 @@
 const NewsAPI = require('newsapi');
-const newsapi = new NewsAPI('5e623c2dbc134cb3a6827b919f4c15ff');
+require('dotenv').load({ silent: true });
+const newsapi = new NewsAPI(process.env.NEWS_APIKEY4);
 var URL = require('url-parse');
+const writeJsonFile = require('write-json-file');
+
 
 // takes a single article object
 // returns the author
@@ -12,23 +15,17 @@ exports.queryNewsAsync =  async (artObj) => {
       sortBy: 'relevance',
     }).then(response => {
       // console.log('\nresponse frowm newsapi search: \n\n', response);
-      return response.articles.map(art => {
-        // console.log('art.resolved_url: ', art.resolved_url);
-        // console.log('art: ', art);
-        if (isURLSame(art.url, artObj.resolved_url)) {
-          console.log('\nWE HAVE A MATCH!!\n');
-          console.log('artObj.url: ', artObj.resolved_url);
-          console.log(`1. art.url = `, art.url);
-          console.log('2. art.author = ', art.author);
-          console.log(`3. news id...`, art.source.id, '\n\n\n');
-          return art.author;
-        }
-        else {
-          return 'search result that didnt match the url';
-        }
+      const authorArrs = response.articles.filter(art =>
+        isURLSame(art.url, artObj.resolved_url)
+      ).map( art => {
+        return art.author
       });
+      console.log('authorArrs: ', authorArrs);
+      writeJsonFile('userData.json', arrOfArrs.toString());
+      return authorArrs.toString()
     });
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err);
   }
 };
@@ -38,6 +35,14 @@ const isURLSame = (url1, url2) => {
   let urlObj2 = URL(url2, true);
   return ( urlObj1.hostname===urlObj2.hostname ) && ( urlObj1.pathname===urlObj2.pathname );
 }
+
+// writeJsonFile('foo.json', {
+//     guesswho: true,
+//     fuckyou: true
+//   })
+//   .then(() => {
+//     console.log('done saving to json');
+// });
 
 //TODO func to return query string (didn't end up using, but its a good function)
 // const makeQueryString = (url) => {

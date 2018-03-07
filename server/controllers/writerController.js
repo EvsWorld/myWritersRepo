@@ -5,6 +5,9 @@ require('events').EventEmitter.prototype._maxListeners = 500;
 
 const fetch = require('isomorphic-fetch');
 const atob = require('atob');
+var fs = require('fs');
+const loadJsonFile = require('load-json-file');
+let _ = require('lodash');
 // QUESTION How to import this scrap function kind of like this?
 // const scrap = require('../utils/scrape').nightmare;
 
@@ -89,10 +92,20 @@ exports.pocketSignIn = async ctx => {
         'access_token': accessToken,
         'detailType': 'simple',
         'contentType': 'article',
-        'count': 50,
+        'count': 30,
         'sort': 'newest',
         // 'tag': 'parents'
       };
+
+      // if "nothing in userData.json" then make this fetch
+      loadJsonFile('../utils/userData.json').then(data => {
+        if (_.isEmpty(data) ) {
+          console.log(data);
+        }
+        // else {
+          // TODO somehow process this and turn send to front end
+        // }
+      });
 
       await fetch(url, {
         method: 'post',
@@ -104,9 +117,9 @@ exports.pocketSignIn = async ctx => {
         body: JSON.stringify(reqBody)
       })
       .then(res => res.json())
-      .then( articles => {
-        // console.log('getArticles response: ', articles.list);
-        return getAuthors(articles.list);
+      .then( parsedJson => {
+        // console.log('getArticles response: ', parsedJson.list);
+        return getAuthors(parsedJson.list);
       })
       .then(writers => {
         console.log('writers: ', writers,'\n');
@@ -124,70 +137,54 @@ exports.pocketSignIn = async ctx => {
       let i = 0;
 
       Promise.all(Object.keys(artArr).map(articleId => {
-        return queryNewsAsync(artArr[articleId])
-      })).then(response => {
-        console.log('THE TITLES ARE:\n',response)
-        return response
+          return queryNewsAsync(artArr[articleId])
+        })
+      ).then(response => {
+        const authorsForReal = response.filter(a => {
+          if (a) return a
+        });
+        // .filter( author => {
+        //   console.log('AUTHOR ', author);
+        //   return (!undefined && (author.length > 0) &)
+        // });
+      console.log('AUTHORSFORREAL: ', authorsForReal)
       })
-
-      // const titles = await Promise.map(Object.keys(artArr)
-      // .map(key => {
-      //   // console.log('\nthis is an input into queryNewsAsync:', artArr[key], `And it's type is:  `, typeof(artArr[key]), '\n' );
-      //   console.log('this is queryNewsAsync: ', queryNewsAsync(artArr[key]));
-      //   return queryNewsAsync(artArr[key]);
-      // }));
-      // return Promise.map(titles);
     };
 
-    // accepts array of titles, and calls the search api function which returns the author.
-    // returns array of authors
-    // syncronously returning and an array of promises that can be awaited/resolved later
-    // const getArrOfWriters = (titArr) => {
-    //   let i = 0;
-    //   const writersPromises = titArr
-    //   .map(title => {
-    //     console.log('this is an input into queryNewsAsync:', title.result);
-    //     return queryNewsAsync(title.result);
-    //   });
-    //   return  Promise.map(writersPromises);
-    // };
-
-    // QUESTION: Arol wrote this; how does it work?
-    // SO promises is an array of promises
+    // // JSSTUDY Not using for now    //
+    // Promise.map = (promises) => {
+    //   return new Promise((resolve, reject) => {
+    //     let counter = 0;
+    //     const results = [];
     //
-    Promise.map = (promises) => {
-      return new Promise((resolve, reject) => {
-        let counter = 0;
-        const results = [];
-
-        const checkCounter = () => {
-          counter--;
-          console.log(counter);
-          if(counter === 0) resolve(results);
-        }
-        // funtion really startes here trying to resolve them
-        // pushes onto my results array, the promise and the resolved promise (the title)
-        promises.forEach(promise => {
-          counter++;
-          console.log(counter);
-          promise
-          .then(result => {
-            results.push({
-              promise,
-              result
-            });
-            checkCounter();
-          })
-          .catch((e) => {
-            results.push({
-              promise,
-              result:null
-            });
-            checkCounter();
-          })
-        });
-      })
-    }
+    //     const checkCounter = () => {
+    //       counter--;
+    //       console.log(counter);
+    //       if(counter === 0) resolve(results);
+    //     }
+    //     // function really startes here trying to resolve them
+    //     // pushes onto my results array, the promise and the resolved promise (the title)
+    //     promises.forEach(promise => {
+    //       counter++;
+    //       console.log(counter);
+    //       promise
+    //       .then(result => {
+    //         results.push({
+    //           promise,
+    //           result
+    //         });
+    //         checkCounter();
+    //       })
+    //       .catch((e) => {
+    //         results.push({
+    //           promise,
+    //           result:null
+    //         });
+    //         checkCounter();
+    //       })
+    //     });
+    //   })
+    // }
     // const getArrOfWriters = async (artArr) => {
     //   const writers = await Promise.all(Object.keys(artArr)
     //   .map(key => nightmare.goto(artArr[key].resolved_url)

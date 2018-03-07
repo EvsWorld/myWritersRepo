@@ -8,7 +8,6 @@ const isURLSame = (url1, url2) => {
   return ( urlObj1.host===urlObj2.host ) && ( urlObj1.pathname===urlObj2.pathname );
 }
 
-console.log( )
 
 const myurl = URL('https://www.theatlantic.com/entertainment/archive/2018/01/saturday-night-live-takes-a-swipe-at-celebrity-journalism/550526/');
 
