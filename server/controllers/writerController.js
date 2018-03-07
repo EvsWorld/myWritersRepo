@@ -11,7 +11,7 @@ let _ = require('lodash');
 // QUESTION How to import this scrap function kind of like this?
 // const scrap = require('../utils/scrape').nightmare;
 
-// const queryNewsAsync = require('../utils/search.js').queryNewsAsync;
+const findMatchingArticles = require('../utils/manualWriteToFile.js').findMatchingArticles;
 
 // send request to pocket for the (temporary) 'request_token' which is needed to send with the 'redirect' to pocket's login page where the use will put in their credentials and then that redirect returns to me just saying 'OK'. That redirect actually has a redirect which tells it to come back to my 'authorize' route.
 exports.pocketSignIn = async ctx => {
@@ -112,46 +112,56 @@ exports.pocketSignIn = async ctx => {
               result[a] = 1;
             }
           });
-          // result.sort();
-          console.log(result);
-          ctx.body = result;
+
+          let sortable = [];
+          for (let auth in result) {
+            sortable.push([ auth, result[auth] ])
+          }
+          sortable.sort((x,y) => {
+            return  y[1] - x[1] ;
+          } );
+          console.log('result: ', result);
+          console.log('sorted: ', sortable);
+          ctx.body = sortable;
 
         }
-        // else {
-          // TODO run the fetch to pocket that then writes to my manualUserData.json file.
-          // TODO trigger some kind of event that the manuaWriteToJson.js file is listening for.
-        // }
+        ///////////////////////////////////////////
+        else {
+        //   // TODO run the fetch to pocket that then writes to my manualUserData.json file.
+        //   // TODO trigger some kind of event that the manuaWriteToJson.js file is listening for.
+          fetch(url, {
+            method: 'post',
+            headers: {
+              "Host": "getpocket.com",
+              "content-type": "application/json; charset=UTF-8",
+              "X-Accept": "application/json"
+            },
+            body: JSON.stringify(reqBody)
+          })
+          .then(res => res.json())
+          .then( parsedJson => {
+            // console.log('getArticles response: ', parsedJson.list);
+            fs.writeFile('/Users/evanhendrix1/google_drive/programming/codeWorks/mywriters/server/utils/manualUserData.json', JSON.stringifyj(parsedJson.list),  function (err) {
+              if (err) throw err;
+              console.log('Saved articles to manualUserData, now calling findMatchingArticles!');
+              return findMatchingArticles();
+            });
+          })
+          .then(writers => {
+            console.log('writers: ', writers,'\n');
+            ctx.body = writers;
+          })
+        }
+        //////////////////////////////////////////////////
       });
-
-    //
-    //   await fetch(url, {
-    //     method: 'post',
-    //     headers: {
-    //       "Host": "getpocket.com",
-    //       "content-type": "application/json; charset=UTF-8",
-    //       "X-Accept": "application/json"
-    //     },
-    //     body: JSON.stringify(reqBody)
-    //   })
-    //   .then(res => res.json())
-    //   .then( parsedJson => {
-    //     // console.log('getArticles response: ', parsedJson.list);
-          // fs.writeFile('./usersAuthors.json', authorsJson,  function (err) {
-          //   if (err) throw err;
-          //   console.log('Saved!');
-          // });
-    //   })
-    //   .then(writers => {
-    //     console.log('writers: ', writers,'\n');
-    //     ctx.body = writers;
-    //   })
-    //   // .then( writers => {
-    //   //   console.log(writers);
-    //   //
-    //   // })
-    //
-
     };
+
+      // .then( writers => {
+      //   console.log(writers);
+      //
+      // })
+
+
     //
     // // func to accept array of article objects, and for every object, scrap the page for the title.
     // // returns array of objects (promis and title as keys)

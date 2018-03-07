@@ -59,13 +59,13 @@ class Dashboard extends Component {
       let count = 0;
       let blahCount = '';
       let authorsResult = '<p> Writers: </p>';
-      let renderAuthors = Object.keys(authors).map( name => {
+      let renderAuthors = authors.map( name => {
         // console.log(writer);
         // count ++;
         // blahCount += 'blah ';
         return (
           <div key={uniqid()}>
-            <h4> You liked {name} {authors[name]} times!</h4>
+            <h4> You liked {name[0]} {name[1]} times!</h4>
             {/* <ul>
               <li> Count : ${count}</li>
               <li> Blahs : ${blahCount} </li>
@@ -84,7 +84,7 @@ class Dashboard extends Component {
   render () {
     return (
       <div className="Dashboard">
-        Writers
+        <h2>Writers</h2>
         {this.state.authors}
         {/* <Route path='/fake' component= {Fake}/> */}
       </div>

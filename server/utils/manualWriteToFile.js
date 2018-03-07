@@ -2,38 +2,41 @@ const NewsAPI = require('newsapi');
 var fs = require('fs');
 // require('dotenv').load({ silent: true });
 // const newsapi = new NewsAPI(process.env.NEWS_APIKEY4);
-const newsapi = new NewsAPI('fa9ba43991944057953a5832cd461017');
+const newsapi = new NewsAPI('ad5871af8f1943579247ef6cb22b9e68');
 var URL = require('url-parse');
 const writeJsonFile = require('write-json-file');
 const loadJsonFile = require('load-json-file');
 
 //TODO: make this function add the date when it is created
 //TODO: Listen for the
-loadJsonFile('/Users/evanhendrix1/google_drive/programming/codeWorks/mywriters/server/utils/manualUserData.json')
-  .then(artArr => {
-    const articles = artArr.list;
-    Promise.all(Object.keys(articles).map(articleId => {
-        return exports.queryNewsAsync(articles[articleId])
-      })
-    ).then(response => {
-      // filters empty arrays out
-      const authorsArr = response.filter(a => {
-        if (a) return a
+exports.findMatchingArticles = () => {
+
+  loadJsonFile('/Users/evanhendrix1/google_drive/programming/codeWorks/mywriters/server/utils/manualUserData.json')
+    .then(artArr => {
+      const articles = artArr.list;
+      Promise.all(Object.keys(articles).map(articleId => {
+          return exports.queryNewsAsync(articles[articleId])
+        })
+      ).then(response => {
+        // filters empty arrays out
+        const authorsArr = response.filter(a => {
+          if (a) return a
+        });
+        // TODO put authorsJson in an object, as a value; add in a data property for the date this runs, then json.stringify it
+        const authorsJson = JSON.stringify(authorsArr);
+      console.log('AUTHORSJSON:  ', authorsJson);
+
+      fs.writeFile('./usersAuthors.json', authorsJson,  function (err) {
+        if (err) throw err;
+        console.log('Saved authors to usersAuthors.json!');
       });
-      // TODO put authorsJson in an object, as a value; add in a data property for the date this runs, then json.stringify it
-      const authorsJson = JSON.stringify(authorsArr);
-    console.log('AUTHORSJSON:  ', authorsJson);
-
-    fs.writeFile('./usersAuthors.json', authorsJson,  function (err) {
-      if (err) throw err;
-      console.log('Saved!');
-    });
 
 
 
-  })
-  .catch(err => console.log(err));
-});
+    })
+    .catch(err => console.log(err));
+  });
+};
 
 // takes a single article object
 // returns the author
