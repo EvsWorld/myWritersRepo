@@ -37,11 +37,17 @@
   padding: 16px;
   color: white;
   text-decoration: none;
+}
 
+h1 {
+  margin: 0;
 }
 
 .Main {
   background-color: grey;
   height: 90vh;
-  
+
+}
+img {
+  margin-top: 30vh;
 }

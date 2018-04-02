@@ -30,12 +30,14 @@ class Main extends Component {
   render () {
     return (
       <div className="Main">
-        <div>This is Main.js</div>
+        <h1>MyWriters</h1>
         {/* This makes a get request to my server which triggers the first fetch (initiated by server) to the pocket API */}
         <Div>
           {/* this a tag is sending the browser to my server's location and the pocket-sign-in route  */}
-          <a href={'http://localhost:3000/pocket-sign-in'} style={buttonStyle} type="button">Click me</a>
+          <a href={'http://localhost:3000/pocket-sign-in'} style={buttonStyle} type="button">Click me to log in</a>
         </Div>
+        <img src="http://i.giphy.com/yuQMFN4hQsUTe.gif"/>
+
       </div>
 
     );

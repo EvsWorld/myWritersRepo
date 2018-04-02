@@ -11,7 +11,7 @@ let _ = require('lodash');
 // QUESTION How to import this scrap function kind of like this?
 // const scrap = require('../utils/scrape').nightmare;
 
-const findMatchingArticles = require('../utils/manualWriteToFile.js').findMatchingArticles;
+const funcs = require('../utils/manualWriteToFile.js');
 
 // send request to pocket for the (temporary) 'request_token' which is needed to send with the 'redirect' to pocket's login page where the use will put in their credentials and then that redirect returns to me just saying 'OK'. That redirect actually has a redirect which tells it to come back to my 'authorize' route.
 exports.pocketSignIn = async ctx => {
@@ -143,7 +143,7 @@ exports.pocketSignIn = async ctx => {
             fs.writeFile('/Users/evanhendrix1/google_drive/programming/codeWorks/mywriters/server/utils/manualUserData.json', JSON.stringify(parsedJson.list),  function (err) {
               if (err) throw err;
               console.log('Saved articles to manualUserData, now calling findMatchingArticles!\n\n');
-              return findMatchingArticles();
+              return funcs;
             });
           })
           .then(writers => {
