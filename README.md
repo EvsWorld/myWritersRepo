@@ -10,6 +10,8 @@ My Writers is an open source project dedicated to giving news consumers greater 
 
 # My Writers API
 
+### Getting Started
+
 Install dependencies
 
 ```
